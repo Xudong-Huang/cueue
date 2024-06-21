@@ -2,12 +2,13 @@ use cueue::*;
 
 #[test]
 fn test_capacity() {
+    let pagesize = unsafe { libc::sysconf(libc::_SC_PAGESIZE) as usize };
     let (w, r) = cueue::<u8>(16).unwrap();
     assert_eq!(w.capacity(), r.capacity());
-    assert_eq!(w.capacity(), 4096);
+    assert_eq!(w.capacity(), pagesize);
 
-    let (w, _r) = cueue::<u8>(4097).unwrap();
-    assert_eq!(w.capacity(), 8192);
+    let (w, _r) = cueue::<u8>(pagesize + 1).unwrap();
+    assert_eq!(w.capacity(), pagesize * 2);
 }
 
 #[test]
