@@ -48,10 +48,31 @@ fn test_reader() {
     let foo = r.read_chunk();
     assert_eq!(foo, b"foo");
     r.commit();
+    r.commit();
 
     assert!(!r.is_abandoned());
     std::mem::drop(w);
     assert!(r.is_abandoned());
+}
+
+#[test]
+#[should_panic]
+fn test_reader_1() {
+    let (mut w, mut r) = cueue(16).unwrap();
+
+    let empty = r.read_chunk();
+    assert_eq!(empty.len(), 0);
+    r.commit();
+
+    let buf = w.write_chunk();
+    buf[..3].copy_from_slice(b"foo");
+    w.commit(3);
+
+    let foo = r.read_chunk();
+    assert_eq!(foo, b"foo");
+    r.commit();
+    // this would trigger a panic because we have no data
+    r.commit_read(1);
 }
 
 #[test]

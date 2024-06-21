@@ -214,17 +214,23 @@ where
 
     /// Mark the slice previously acquired by `read_chunk` as consumed,
     /// making it available for writing.
+    /// Safety
+    ///
+    /// After commit the previously acquired slice is no longer valid.
     pub fn commit(&mut self) {
+        if self.read_size == 0 {
+            return;
+        }
         self.commit_read(self.read_size as usize);
     }
 
     /// Mark the first n elements previously acquired by `read_chunk` as consumed,
     /// making it available for writing.
     pub fn commit_read(&mut self, n: usize) {
+        let r = self.read_pos().load(Ordering::Relaxed);
         let rs = n as u64;
         assert!(rs <= self.read_size);
         self.read_size -= rs;
-        let r = self.read_pos().load(Ordering::Relaxed);
         self.read_pos().store(r + rs, Ordering::Release);
     }
 
