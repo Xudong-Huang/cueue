@@ -57,7 +57,7 @@ fn test_reader() {
 
 #[test]
 #[should_panic]
-fn test_reader_1() {
+fn test_commit_read_panic() {
     let (mut w, mut r) = cueue(16).unwrap();
 
     let empty = r.read_chunk();
