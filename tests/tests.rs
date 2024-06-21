@@ -169,6 +169,18 @@ fn test_pop() {
 }
 
 #[test]
+fn test_chunk_size() {
+    let (mut w, mut r) = cueue(16).unwrap();
+    let cap = w.capacity();
+
+    for i in 0..cap * 2 {
+        w.push(i).unwrap();
+        assert_eq!(w.write_chunk().len(), cap - 1);
+        assert_eq!(r.pop(), Some(i));
+    }
+}
+
+#[test]
 fn test_push_string() {
     let (mut w, _) = cueue(16).unwrap();
     let cap = w.capacity();
